@@ -1,12 +1,9 @@
----
-layout: null
----
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>demifriend</title>
+  <title>TheSecondTrial — 0</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -16,23 +13,32 @@ layout: null
       align-items: center;
       justify-content: center;
     }
-    a {
-      margin-left: -130px; 
+    .number {
       color: #fff;
       font-family: sans-serif;
-      font-size: 1.1rem;
-      font-weight: 300;
-      letter-spacing: 0.15em;
+      font-size: 10rem;
+      font-weight: 200;
+      letter-spacing: -0.02em;
+    }
+    .back {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
       text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.35);
-      padding: 0.75rem 2rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 0.5rem 1.1rem;
       border-radius: 4px;
       transition: background 0.2s;
     }
-    a:hover { background: rgba(255,255,255,0.08); }
+    .back:hover { background: rgba(255,255,255,0.08); }
   </style>
 </head>
 <body>
-  <a href="/TheSecondTrial/">The Second Trial</a>
+  <a href="/TheSecondTrial/" class="back">← Back</a>
+  <span class="number">0</span>
 </body>
 </html>
