@@ -6,14 +6,180 @@
   <title>TheSecondTrial — 3</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background-color: #000; display: flex; align-items: center; justify-content: center; }
-    .number { color: #fff; font-family: sans-serif; font-size: 10rem; font-weight: 200; letter-spacing: -0.02em; }
-    .back { position: fixed; top: 2rem; left: 2rem; color: #fff; font-family: sans-serif; font-size: 0.9rem; letter-spacing: 0.08em; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); padding: 0.5rem 1.1rem; border-radius: 4px; transition: background 0.2s; }
+    html, body { width: 100%; height: 100%; background-color: #000; overflow: hidden; }
+    .back { position: fixed; top: 2rem; left: 2rem; color: #fff; font-family: sans-serif; font-size: 0.9rem; letter-spacing: 0.08em; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); padding: 0.5rem 1.1rem; border-radius: 4px; transition: background 0.2s; z-index: 10000; }
     .back:hover { background: rgba(255,255,255,0.08); }
+    #bg { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 100%; max-height: 100%; object-fit: contain; z-index: 0; pointer-events: none; }
+    .piece { position: absolute; cursor: grab; user-select: none; }
+    .piece.dragging { cursor: grabbing; }
   </style>
 </head>
 <body>
   <a href="/TheSecondTrial/" class="back">← Back</a>
-  <span class="number">3</span>
+  <img id="bg" src="Paintings.png" alt="">
+  <script>
+    const COLS = 3, ROWS = 3;
+    const TARGET_W = 265;
+
+    let zTop = 1;
+    let activePiece = null, dragOX = 0, dragOY = 0;
+
+    document.addEventListener('mousemove', e => {
+      if (!activePiece) return;
+      activePiece.style.left = (e.clientX - dragOX) + 'px';
+      activePiece.style.top  = (e.clientY - dragOY) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      if (activePiece) { activePiece.classList.remove('dragging'); activePiece = null; }
+    });
+    document.addEventListener('touchmove', e => {
+      if (!activePiece) return;
+      const t = e.touches[0];
+      activePiece.style.left = (t.clientX - dragOX) + 'px';
+      activePiece.style.top  = (t.clientY - dragOY) + 'px';
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', () => {
+      if (activePiece) { activePiece.classList.remove('dragging'); activePiece = null; }
+    });
+
+    function jigsawPath(ctx, rx, ry, pw, ph, tx, ty, tabs) {
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+
+      // Top edge (left → right)
+      if (tabs.top === 0) {
+        ctx.lineTo(rx + pw, ry);
+      } else {
+        const d = -tabs.top * ty;
+        ctx.lineTo(rx + pw * 0.35, ry);
+        ctx.bezierCurveTo(rx + pw*0.35, ry + d*0.7, rx + pw*0.4,  ry + d, rx + pw*0.5, ry + d);
+        ctx.bezierCurveTo(rx + pw*0.6,  ry + d,     rx + pw*0.65, ry + d*0.7, rx + pw*0.65, ry);
+        ctx.lineTo(rx + pw, ry);
+      }
+
+      // Right edge (top → bottom)
+      if (tabs.right === 0) {
+        ctx.lineTo(rx + pw, ry + ph);
+      } else {
+        const d = tabs.right * tx;
+        ctx.lineTo(rx + pw, ry + ph * 0.35);
+        ctx.bezierCurveTo(rx + pw + d*0.7, ry + ph*0.35, rx + pw + d, ry + ph*0.4,  rx + pw + d, ry + ph*0.5);
+        ctx.bezierCurveTo(rx + pw + d,     ry + ph*0.6,  rx + pw + d*0.7, ry + ph*0.65, rx + pw, ry + ph*0.65);
+        ctx.lineTo(rx + pw, ry + ph);
+      }
+
+      // Bottom edge (right → left)
+      if (tabs.bottom === 0) {
+        ctx.lineTo(rx, ry + ph);
+      } else {
+        const d = tabs.bottom * ty;
+        ctx.lineTo(rx + pw * 0.65, ry + ph);
+        ctx.bezierCurveTo(rx + pw*0.65, ry + ph + d*0.7, rx + pw*0.6,  ry + ph + d, rx + pw*0.5, ry + ph + d);
+        ctx.bezierCurveTo(rx + pw*0.4,  ry + ph + d,     rx + pw*0.35, ry + ph + d*0.7, rx + pw*0.35, ry + ph);
+        ctx.lineTo(rx, ry + ph);
+      }
+
+      // Left edge (bottom → top)
+      if (tabs.left === 0) {
+        ctx.lineTo(rx, ry);
+      } else {
+        const d = -tabs.left * tx;
+        ctx.lineTo(rx, ry + ph * 0.65);
+        ctx.bezierCurveTo(rx + d*0.7, ry + ph*0.65, rx + d, ry + ph*0.6,  rx + d, ry + ph*0.5);
+        ctx.bezierCurveTo(rx + d,     ry + ph*0.4,  rx + d*0.7, ry + ph*0.35, rx, ry + ph*0.35);
+        ctx.lineTo(rx, ry);
+      }
+
+      ctx.closePath();
+    }
+
+    function makeDraggable(el) {
+      el.addEventListener('mousedown', e => {
+        activePiece = el;
+        dragOX = e.clientX - el.offsetLeft;
+        dragOY = e.clientY - el.offsetTop;
+        el.style.zIndex = ++zTop;
+        el.classList.add('dragging');
+        e.preventDefault();
+      });
+      el.addEventListener('touchstart', e => {
+        const t = e.touches[0];
+        activePiece = el;
+        dragOX = t.clientX - el.offsetLeft;
+        dragOY = t.clientY - el.offsetTop;
+        el.style.zIndex = ++zTop;
+        el.classList.add('dragging');
+        e.preventDefault();
+      }, { passive: false });
+    }
+
+    function createPieces(img, targetW = TARGET_W) {
+      const PW = Math.round(targetW / COLS);
+      const PH = PW;
+      const TX = Math.round(PW * 0.22);
+      const TY = Math.round(PH * 0.22);
+      const CW = PW + 2 * TX;
+      const CH = PH + 2 * TY;
+      const totalW = COLS * PW, totalH = ROWS * PH;
+      const scale = Math.min(totalW / img.naturalWidth, totalH / img.naturalHeight);
+      const scaledW = img.naturalWidth * scale;
+      const scaledH = img.naturalHeight * scale;
+      const imgOffX = (totalW - scaledW) / 2;
+      const imgOffY = (totalH - scaledH) / 2;
+
+      const bottomTabs = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+      const rightTabs  = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+
+      for (let r = 0; r < ROWS - 1; r++)
+        for (let c = 0; c < COLS; c++)
+          bottomTabs[r][c] = Math.random() < 0.5 ? 1 : -1;
+      for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS - 1; c++)
+          rightTabs[r][c] = Math.random() < 0.5 ? 1 : -1;
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const tabs = {
+            top:    r === 0      ? 0 : -bottomTabs[r-1][c],
+            bottom: r === ROWS-1 ? 0 :  bottomTabs[r][c],
+            left:   c === 0      ? 0 : -rightTabs[r][c-1],
+            right:  c === COLS-1 ? 0 :  rightTabs[r][c],
+          };
+
+          const cv = document.createElement('canvas');
+          cv.width  = CW;
+          cv.height = CH;
+          cv.className = 'piece';
+          cv.style.zIndex = ++zTop;
+
+          const ctx = cv.getContext('2d');
+
+          ctx.save();
+          jigsawPath(ctx, TX, TY, PW, PH, TX, TY, tabs);
+          ctx.clip();
+          ctx.drawImage(img, TX + imgOffX - c * PW, TY + imgOffY - r * PH, scaledW, scaledH);
+          ctx.restore();
+
+          jigsawPath(ctx, TX, TY, PW, PH, TX, TY, tabs);
+          ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          cv.style.left = Math.random() * Math.max(0, window.innerWidth  - CW) + 'px';
+          cv.style.top  = Math.random() * Math.max(0, window.innerHeight - CH) + 'px';
+
+          document.body.appendChild(cv);
+          makeDraggable(cv);
+        }
+      }
+    }
+
+    [['P1.png', Math.round(TARGET_W * 0.88)], ['P2.png', TARGET_W], ['P3.png', TARGET_W]].forEach(([src, tw]) => {
+      const img = new Image();
+      img.onload = () => createPieces(img, tw);
+      img.src = src;
+    });
+  </script>
 </body>
 </html>
