@@ -40,8 +40,8 @@
       size: d.size,
       x: 100 + Math.random() * (window.innerWidth - 200),
       y: 100 + Math.random() * (window.innerHeight - 200),
-      vx: (1.5 + i * 0.3) * (Math.random() < 0.5 ? 1 : -1),
-      vy: (1.5 + i * 0.3) * (Math.random() < 0.5 ? 1 : -1),
+      vx: (0.75 + i * 0.15) * (Math.random() < 0.5 ? 1 : -1),
+      vy: (0.75 + i * 0.15) * (Math.random() < 0.5 ? 1 : -1),
     }));
 
     let mouseX = -999, mouseY = -999;
@@ -84,7 +84,7 @@
 
       // flashlight overlay
       if (flashlightOn) {
-        const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 36);
+        const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 54);
         grad.addColorStop(0,   'rgba(0,0,0,0)');
         grad.addColorStop(0.4, 'rgba(0,0,0,0)');
         grad.addColorStop(0.7, 'rgba(0,0,0,1)');
