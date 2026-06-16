@@ -43,6 +43,14 @@
         ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
       }
 
+      ctx.textAlign = 'center';
+      ctx.font = '200 3rem sans-serif';
+      ctx.letterSpacing = '0.2em';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('_ _ _ _, _ _ _ _', W / 2, H - 48);
+      ctx.textAlign = 'left';
+      ctx.letterSpacing = '0';
+
       const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 54);
       grad.addColorStop(0,   'rgba(0,0,0,0)');
       grad.addColorStop(0.4, 'rgba(0,0,0,0)');
