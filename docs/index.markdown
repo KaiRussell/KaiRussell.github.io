@@ -33,6 +33,6 @@ layout: null
   </style>
 </head>
 <body>
-  <a href="/TheSecondTrial/">The Second Trial</a>
+  <a href="/TheThirteenthIsland/">The Thirteenth Island</a>
 </body>
 </html>
