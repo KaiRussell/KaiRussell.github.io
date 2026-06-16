@@ -27,17 +27,17 @@
     window.addEventListener('resize', resize);
 
     const digits = [
-      { ch: String.fromCharCode(54),  size: 32  },
-      { ch: String.fromCharCode(48),  size: 64  },
-      { ch: String.fromCharCode(56),  size: 96  },
-      { ch: String.fromCharCode(52),  size: 128 },
-      { ch: String.fromCharCode(51),  size: 160 },
-      { ch: String.fromCharCode(57),  size: 224 },
+      { ch: String.fromCharCode(54),  sizeFactor: 0.04 },
+      { ch: String.fromCharCode(48),  sizeFactor: 0.08 },
+      { ch: String.fromCharCode(56),  sizeFactor: 0.12 },
+      { ch: String.fromCharCode(52),  sizeFactor: 0.16 },
+      { ch: String.fromCharCode(51),  sizeFactor: 0.20 },
+      { ch: String.fromCharCode(57),  sizeFactor: 0.28 },
     ];
 
     const state = digits.map((d, i) => ({
       ch: d.ch,
-      size: d.size,
+      sizeFactor: d.sizeFactor,
       x: 100 + Math.random() * (window.innerWidth - 200),
       y: 100 + Math.random() * (window.innerHeight - 200),
       vx: (0.75 + i * 0.15) * (Math.random() < 0.5 ? 1 : -1),
@@ -51,12 +51,14 @@
 
     function draw() {
       const W = canvas.width, H = canvas.height;
+      const base = Math.min(W, H);
       ctx.clearRect(0, 0, W, H);
 
       for (const s of state) {
-        ctx.font = `200 ${s.size}px sans-serif`;
+        const size = Math.round(s.sizeFactor * base);
+        ctx.font = `200 ${size}px sans-serif`;
         const w = ctx.measureText(s.ch).width;
-        const h = s.size;
+        const h = size;
 
         s.x += s.vx; s.y += s.vy;
         if (s.x <= 0) { s.x = 0; s.vx = Math.abs(s.vx); }
@@ -84,7 +86,7 @@
 
       // flashlight overlay
       if (flashlightOn) {
-        const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 54);
+        const grad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, base * 0.07);
         grad.addColorStop(0,   'rgba(0,0,0,0)');
         grad.addColorStop(0.4, 'rgba(0,0,0,0)');
         grad.addColorStop(0.7, 'rgba(0,0,0,1)');
